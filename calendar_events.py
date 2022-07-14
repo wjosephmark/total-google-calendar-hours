@@ -62,9 +62,7 @@ def sort_calendar_events(events_dict):
 def main():
     reponse_dict = get_calendar_events()
     events_dict = reponse_dict['items']
-    response = sort_calendar_events(events_dict)
-    for response_string in response:
-        print(response_string)
+    client_hours_array = sort_calendar_events(events_dict)
 
 if __name__ == '__main__':
     main()
