@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv, find_dotenv
+import datetime
 
 load_dotenv(find_dotenv())
 
@@ -15,8 +16,8 @@ def get_calendar_events():
 
 def sort_calendar_events(events_dict):
     relevant_events = []
-    client_info_dict = {}
-
+    total_hours_dict = {}
+    response_array = []
     for event in events_dict:
         # IF EVENT HAS TITLE
         if 'summary' in event:
@@ -25,18 +26,43 @@ def sort_calendar_events(events_dict):
 
     for event in relevant_events:
         summary = event['summary']
-        if summary not in client_info_dict.keys():
-            client_info_dict[summary] = 1
+
+        # SET UTC TIMESTAMPS TO VARIABLES
+        start_timestamp = event['start']['dateTime']
+        end_timestamp= event['end']['dateTime']
+
+        # CONVERT UTC TIMESTAMP TO DATETIME STRING
+        start_datetime = datetime.datetime.strptime(start_timestamp, '%Y-%m-%dT%H:%M:%S%z')
+        end_datetime = datetime.datetime.strptime(end_timestamp, '%Y-%m-%dT%H:%M:%S%z')
+
+        # EXTRACT HOURS AND MINUTES FROM DATETIME STRINGS
+        start_hour = start_datetime.hour
+        end_hour = end_datetime.hour
+        start_minute = start_datetime.minute
+        end_minute = end_datetime.minute
+
+        # FIND DIFFERENCE IN HOURS AND MINUTES
+        hour_diff = end_hour-start_hour
+        minute_diff = end_minute-start_minute
+
+        if summary not in total_hours_dict:
+            formatted_dict = {'summary': summary, 'hours': hour_diff, 'minutes': minute_diff}
+            total_hours_dict[summary] = formatted_dict
         else:
-            client_info_dict[summary] += 1
+            total_hours_dict[summary]['hours'] = total_hours_dict[summary]['hours'] + hour_diff
+            total_hours_dict[summary]['minutes'] = total_hours_dict[summary]['minutes'] + minute_diff
 
-    print(client_info_dict)
+    for client in total_hours_dict:
+        client_info = total_hours_dict[client]
+        #TODO: ADD LOGIC TO DETERMINE USE CORRECT VARIATION OF MINUTES/HOURS
+        response_array.append(f"{client_info['summary']} owes for {client_info['hours']} hours and {client_info['minutes']} minutes")
 
+    return response_array
 
 def main():
     reponse_dict = get_calendar_events()
     events_dict = reponse_dict['items']
-    sort_calendar_events(events_dict)
+    client_hours_array = sort_calendar_events(events_dict)
 
 if __name__ == '__main__':
     main()
