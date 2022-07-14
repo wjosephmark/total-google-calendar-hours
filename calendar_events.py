@@ -9,15 +9,34 @@ calendar_id = os.getenv('CALENDAR_ID')
 
 
 def get_calendar_events():
-    calnders_api_response = requests.get(f'https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events?key={api_key}')
+    calenders_api_response = requests.get(f'https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events?key={api_key}')
 
-    events_dictionary = calnders_api_response.text
+    return calenders_api_response.json()
 
-    return events_dictionary
+def sort_calendar_events(events_dict):
+    relevant_events = []
+    client_info_dict = {}
+
+    for event in events_dict:
+        # IF EVENT HAS TITLE
+        if 'summary' in event:
+            if 'Test' in event['summary']:
+                relevant_events.append(event)
+
+    for event in relevant_events:
+        summary = event['summary']
+        if summary not in client_info_dict.keys():
+            client_info_dict[summary] = 1
+        else:
+            client_info_dict[summary] += 1
+
+    print(client_info_dict)
+
 
 def main():
-    events_dictionary = get_calendar_events()
-
+    reponse_dict = get_calendar_events()
+    events_dict = reponse_dict['items']
+    sort_calendar_events(events_dict)
 
 if __name__ == '__main__':
     main()
