@@ -54,7 +54,6 @@ def sort_calendar_events(events_dict):
 
     for client in total_hours_dict:
         client_info = total_hours_dict[client]
-        #TODO: ADD LOGIC TO DETERMINE USE CORRECT VARIATION OF MINUTES/HOURS
         response_array.append(f"{client_info['summary']} owes for {client_info['hours']} hours and {client_info['minutes']} minutes")
 
     return response_array
